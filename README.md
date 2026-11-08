@@ -1,48 +1,35 @@
-# Simple Convolutional Neural Network (CNN) for MNIST
+app.py
+# Deep Residual CNN Application for MNIST
 
-A lightweight, modular, and efficient Convolutional Neural Network (CNN) implemented in PyTorch for classifying handwritten digits using the MNIST dataset.
-
----
-
-## Architecture Overview
-
-The network processes 28x28 grayscale digit images through the following pipeline:
-
-1. **Convolutional Block 1**:
-   - `Conv2d(1, 32, kernel_size=3, padding=1)`
-   - `BatchNorm2d(32)`
-   - `ReLU()`
-   - `MaxPool2d(kernel_size=2, stride=2)` -> Output shape: `(32, 14, 14)`
-
-2. **Convolutional Block 2**:
-   - `Conv2d(32, 64, kernel_size=3, padding=1)`
-   - `BatchNorm2d(64)`
-   - `ReLU()`
-   - `MaxPool2d(kernel_size=2, stride=2)` -> Output shape: `(64, 7, 7)`
-
-3. **Classification Head**:
-   - `Flatten()`
-   - `Linear(64 * 7 * 7, 128)` + `ReLU()`
-   - `Dropout(p=0.25)` (regularization)
-   - `Linear(128, 10)` (logits for digits 0-9)
+A modular, production-grade Deep Residual Convolutional Neural Network (ResCNN) application implemented in PyTorch for classifying handwritten digits using the MNIST dataset.
 
 ---
 
-## Setup & Installation
+## Architecture & Features
 
-### 1. Prerequisites
-- Python 3.10+ (tested on Python 3.13)
-- Git
+### 1. Residual Convolutional Network (`cnn_app/model.py`)
+- **Residual Blocks**: Residual connections with dual 3x3 convolutions, batch normalization, and ReLU activations to mitigate vanishing gradients.
+- **Hierarchical Feature Maps**: 32 -> 64 -> 128 channel progressions.
+- **Global Average Pooling**: Minimizes parameter counts while preventing overfitting.
+- **Grad-CAM Saliency Hooks**: Built-in gradient and activation hooks for visual interpretability.
 
-### 2. Environment Setup
-Create a virtual environment (optional but recommended):
+### 2. Explainability & Analysis (`cnn_app/gradcam.py`)
+- Computes Gradient-weighted Class Activation Mapping (Grad-CAM) to visualize the exact spatial regions influencing prediction decisions.
+- Saves multi-sample comparative heatmaps to `outputs/gradcam_explain.png`.
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+### 3. Detailed Multiclass Metrics (`cnn_app/metrics.py`)
+- Full confusion matrix calculation.
+- Per-class Precision, Recall, and F1-Score reporting.
+- High-resolution annotated confusion matrix heatmap saved to `outputs/confusion_matrix.png`.
 
-Install the dependencies:
+### 4. Performance Benchmarking (`cnn_app/benchmark.py`)
+- Hardware profiling: Parameter count analysis.
+- Latency profiling across 500 iterations (Mean, Median P50, P95, P99).
+- Inference throughput calculation (frames / samples per second).
+
+---
+
+## Installation & Setup
 
 ```powershell
 pip install -r requirements.txt
@@ -50,27 +37,30 @@ pip install -r requirements.txt
 
 ---
 
-## Usage
+## CLI Usage
 
-Run the training and evaluation script:
-
+### Run End-to-End Pipeline (Training, Evaluation, Grad-CAM, & Benchmark)
 ```powershell
-python main.py
+python -m cnn_app.app run-all
 ```
 
-### What `main.py` Does:
-1. Automatically downloads and normalizes the MNIST dataset to `./data/`.
-2. Trains the `SimpleCNN` model for 3 epochs using the Adam optimizer and CrossEntropyLoss.
-3. Evaluates test set performance and reports loss and accuracy metrics.
-4. Saves the trained weights to `mnist_cnn.pth`.
-
----
-
-## Expected Results
-
-After 3 epochs of training:
-- **Test Loss**: ~0.0300 - 0.0400
-- **Test Accuracy**: > 98.8%
+### Standalone Subcommands
+- **Train Model**:
+  ```powershell
+  python -m cnn_app.app train --epochs 2 --batch-size 64 --lr 0.001
+  ```
+- **Evaluate on Test Set & Save Confusion Matrix**:
+  ```powershell
+  python -m cnn_app.app eval
+  ```
+- **Generate Grad-CAM Heatmaps**:
+  ```powershell
+  python -m cnn_app.app explain
+  ```
+- **Benchmark Latency & Throughput**:
+  ```powershell
+  python -m cnn_app.app benchmark
+  ```
 
 ---
 

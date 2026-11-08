@@ -21,6 +21,9 @@ MNIST/
 *.pth
 *.onnx
 
+# Generated outputs
+outputs/
+
 # IDE and OS files
 .vscode/
 .idea/
